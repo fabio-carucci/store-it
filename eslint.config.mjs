@@ -1,7 +1,7 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { FlatCompat } from "@eslint/compat";
+import { FlatCompat } from "@eslint/eslintrc";
 import js from "@eslint/js";
 
 const __filename = fileURLToPath(import.meta.url);

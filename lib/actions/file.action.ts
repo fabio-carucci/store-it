@@ -1,8 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { ID, Models, Query } from "node-appwrite";
+import { ID, Query } from "node-appwrite";
 import { InputFile } from "node-appwrite/file";
+
+import { User } from "@/types/user";
 
 import { createAdminClient } from "../appwrite";
 import { appwriteConfig } from "../appwrite/config";
@@ -63,7 +65,7 @@ export const uploadFile = async ({
   }
 };
 
-const createQueries = (currentUser: Models.Document & { email: string }) => {
+const createQueries = (currentUser: User) => {
   const queries = [
     Query.or([
       Query.equal("owner", [currentUser.$id]),

@@ -1,19 +1,18 @@
 "use server";
 
-import { ID, Query } from "node-appwrite";
+import { Query, ID } from "node-appwrite";
 
 import { avatarPlaceholderUrl } from "@/constants";
-
-import { createAdminClient } from "../appwrite";
-import { appwriteConfig } from "../appwrite/config";
-import { parseStringify } from "../utils";
+import { createAdminClient } from "@/lib/appwrite";
+import { appwriteConfig } from "@/lib/appwrite/config";
+import { parseStringify } from "@/lib/utils";
 
 const getUserByEmail = async (email: string) => {
   const { databases } = await createAdminClient();
 
   const result = await databases.listDocuments(
-    appwriteConfig.databaseID,
-    appwriteConfig.usersCollectionID,
+    appwriteConfig.databaseId,
+    appwriteConfig.usersCollectionId,
     [Query.equal("email", [email])]
   );
 
@@ -25,7 +24,7 @@ const handleError = (error: unknown, message: string) => {
   throw error;
 };
 
-const sendEmailOTP = async (email: string) => {
+export const sendEmailOTP = async ({ email }: { email: string }) => {
   const { account } = await createAdminClient();
 
   try {
@@ -45,16 +44,15 @@ export const createAccount = async ({
 }) => {
   const existingUser = await getUserByEmail(email);
 
-  const accountId = sendEmailOTP(email);
-
+  const accountId = await sendEmailOTP({ email });
   if (!accountId) throw new Error("Failed to send an OTP");
 
   if (!existingUser) {
     const { databases } = await createAdminClient();
 
     await databases.createDocument(
-      appwriteConfig.databaseID,
-      appwriteConfig.usersCollectionID,
+      appwriteConfig.databaseId,
+      appwriteConfig.usersCollectionId,
       ID.unique(),
       {
         fullName,

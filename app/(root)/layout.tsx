@@ -6,6 +6,9 @@ import Sidebar from "@/components/Sidebar";
 import { Toaster } from "@/components/ui/toaster";
 import { getCurrentUser } from "@/lib/actions/user.action";
 
+// Force dynamic rendering since we use cookies
+export const dynamic = "force-dynamic";
+
 const RootLayout = async ({ children }: { children: React.ReactNode }) => {
   const currentUser = await getCurrentUser();
 

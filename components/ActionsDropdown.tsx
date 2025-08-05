@@ -1,5 +1,5 @@
 "use client";
-import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
+import { DialogTitle } from "@radix-ui/react-dialog";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -24,6 +24,7 @@ import { renameFile } from "@/lib/actions/file.action";
 import { constructDownloadUrl } from "@/lib/utils";
 import { FileDocument } from "@/types/file";
 
+import { FileDetails } from "./ActionsModalContent";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 
@@ -75,15 +76,14 @@ const ActionsDropdown = ({ file }: { file: FileDocument }) => {
           <DialogTitle className="text-center text-light-100">
             {label}
           </DialogTitle>
-          <DialogDescription>
-            {value === "rename" && (
-              <Input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            )}
-          </DialogDescription>
+          {value === "rename" && (
+            <Input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          )}
+          {value === "details" && <FileDetails file={file} />}
         </DialogHeader>
         {["rename", "delete", "share"].includes(value) && (
           <DialogFooter className="flex flex-col gap-3 md:flex-row">

@@ -2,6 +2,7 @@
 import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import {
@@ -19,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { actionsDropdownItems } from "@/constants";
+import { renameFile } from "@/lib/actions/file.action";
 import { constructDownloadUrl } from "@/lib/utils";
 import { FileDocument } from "@/types/file";
 
@@ -26,6 +28,8 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 
 const ActionsDropdown = ({ file }: { file: FileDocument }) => {
+  const path = usePathname();
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [action, setAction] = useState<ActionType | null>(null);
@@ -40,7 +44,25 @@ const ActionsDropdown = ({ file }: { file: FileDocument }) => {
     setIsLoading(false);
   };
 
-  const handleAction = async () => {};
+  const handleAction = async () => {
+    if (!action) return;
+    setIsLoading(true);
+
+    let success = false;
+
+    const actions = {
+      rename: () =>
+        renameFile({ fileId: file.$id, name, extension: file.extension, path }),
+      share: () => console.log("share"),
+      delete: () => console.log("delete"),
+    };
+
+    success = await actions[action.value as keyof typeof actions]();
+
+    if (success) closeAllModals();
+
+    setIsLoading(false);
+  };
 
   const renderDialogContent = () => {
     if (!action) return null;

@@ -8,6 +8,7 @@ import { useState } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
 } from "@/components/ui/dialog";
@@ -20,11 +21,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { actionsDropdownItems } from "@/constants";
-import { renameFile } from "@/lib/actions/file.action";
+import { renameFile, updateFileUsers } from "@/lib/actions/file.action";
 import { constructDownloadUrl } from "@/lib/utils";
 import { FileDocument } from "@/types/file";
 
-import { FileDetails } from "./ActionsModalContent";
+import { FileDetails, ShareInput } from "./ActionsModalContent";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 
@@ -36,6 +37,7 @@ const ActionsDropdown = ({ file }: { file: FileDocument }) => {
   const [action, setAction] = useState<ActionType | null>(null);
   const [name, setName] = useState(file.name);
   const [isLoading, setIsLoading] = useState(false);
+  const [emails, setEmails] = useState<string[]>([]);
 
   const closeAllModals = () => {
     setIsModalOpen(false);
@@ -54,7 +56,7 @@ const ActionsDropdown = ({ file }: { file: FileDocument }) => {
     const actions = {
       rename: () =>
         renameFile({ fileId: file.$id, name, extension: file.extension, path }),
-      share: () => console.log("share"),
+      share: () => updateFileUsers({ fileId: file.$id, emails, path }),
       delete: () => console.log("delete"),
     };
 
@@ -63,6 +65,20 @@ const ActionsDropdown = ({ file }: { file: FileDocument }) => {
     if (success) closeAllModals();
 
     setIsLoading(false);
+  };
+
+  const handleRemoveUser = async (email: string) => {
+    const updatedEmails = emails.filter((e) => e !== email);
+
+    const success = await updateFileUsers({
+      fileId: file.$id,
+      emails: updatedEmails,
+      path,
+    });
+
+    if (success) setEmails(updatedEmails);
+
+    closeAllModals();
   };
 
   const renderDialogContent = () => {
@@ -76,6 +92,9 @@ const ActionsDropdown = ({ file }: { file: FileDocument }) => {
           <DialogTitle className="text-center text-light-100">
             {label}
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            {label} dialog description
+          </DialogDescription>
           {value === "rename" && (
             <Input
               type="text"
@@ -84,6 +103,13 @@ const ActionsDropdown = ({ file }: { file: FileDocument }) => {
             />
           )}
           {value === "details" && <FileDetails file={file} />}
+          {value === "share" && (
+            <ShareInput
+              file={file}
+              onInputChange={setEmails}
+              onRemove={handleRemoveUser}
+            />
+          )}
         </DialogHeader>
         {["rename", "delete", "share"].includes(value) && (
           <DialogFooter className="flex flex-col gap-3 md:flex-row">
